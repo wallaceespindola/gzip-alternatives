@@ -13,7 +13,7 @@ public class TestBasics {
     public static void main(String[] args) {
 
         SerializationTestUtils testUtils = new SerializationTestUtils();
-        MyFile myFile = testUtils.saveAndRetrieveMyFile();
+        MyTestObject myTestObj = testUtils.saveAndRetrieveMyTestObj();
 
         long start;
         String description = "STD Standard";
@@ -22,7 +22,7 @@ public class TestBasics {
         start = System.nanoTime();
 
         try (ObjectOutputStream oos = new ObjectOutputStream(countStream)) {
-            oos.writeObject(myFile);
+            oos.writeObject(myTestObj);
         } catch (IOException pE) {
             System.out.println(CAUGHT_ERROR_PROCESSING + "serialization " + description + " : " + pE);
         }
@@ -31,7 +31,7 @@ public class TestBasics {
         description = "Apache SerializationUtils";
         System.out.println(SERIALIZATION_HEADER + description);
         start = System.nanoTime();
-        byte[] objectBytes = SerializationUtils.serialize(myFile);
+        byte[] objectBytes = SerializationUtils.serialize(myTestObj);
         logDuration(start, SERIALIZATION + description, objectBytes.length);
     }
 

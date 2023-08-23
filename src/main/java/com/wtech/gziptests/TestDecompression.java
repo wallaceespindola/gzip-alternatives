@@ -36,7 +36,7 @@ public class TestDecompression {
         TestDecompression test = new TestDecompression();
         SerializationTestUtils testUtils = new SerializationTestUtils();
 
-        MyFile myFile = testUtils.saveAndRetrieveMyFile();
+        MyTestObject myTestObj = testUtils.saveAndRetrieveMyTestObj();
         test.setOriginalSerialFileSizeBytes(testUtils.getOriginalSerialFileSizeBytes());
 
         EnumSet<SerializationType> serializationType = SerializationType.LZ4_TYPES; // Change it to have other serialization tests
@@ -45,10 +45,10 @@ public class TestDecompression {
         System.out.println("\n[WALLY] ########## TESTING TYPE: " + testType);
         switch (testType) {
             case SHORT:
-                serializationType.forEach(serialType -> test.testSerializationShort(myFile, serialType));
+                serializationType.forEach(serialType -> test.testSerializationShort(myTestObj, serialType));
                 break;
             case LONG:
-                serializationType.forEach(serialType -> test.testSerializationLong(myFile, serialType));
+                serializationType.forEach(serialType -> test.testSerializationLong(myTestObj, serialType));
                 break;
             default:
                 System.out.println(WARNING_NOT_A_KNOWN_TYPE);
@@ -69,28 +69,28 @@ public class TestDecompression {
     /**
      * Test simplified symmetric combination for buffers: KB-KB, MB-MB
      *
-     * @param myFile
+     * @param myTestObj
      * @param type
      */
-    public void testSerializationShort(MyFile myFile, SerializationType type) {
+    public void testSerializationShort(MyTestObject myTestObj, SerializationType type) {
         System.out.println(STARTING_TEST + type);
-        testSerializationShort(myFile, type, ByteSizeType.BYTE_SIZE_KB);
-        testSerializationShort(myFile, type, ByteSizeType.BYTE_SIZE_MB);
+        testSerializationShort(myTestObj, type, ByteSizeType.BYTE_SIZE_KB);
+        testSerializationShort(myTestObj, type, ByteSizeType.BYTE_SIZE_MB);
     }
 
     /**
      * Test long for all combinations: KB x MB buffers
      *
-     * @param myFile
+     * @param myTestObj
      * @param type
      */
-    public void testSerializationLong(MyFile myFile, SerializationType type) {
+    public void testSerializationLong(MyTestObject myTestObj, SerializationType type) {
         System.out.println(STARTING_TEST + type);
-        testSerializationLong(myFile, type, ByteSizeType.BYTE_SIZE_KB);
-        testSerializationLong(myFile, type, ByteSizeType.BYTE_SIZE_MB);
+        testSerializationLong(myTestObj, type, ByteSizeType.BYTE_SIZE_KB);
+        testSerializationLong(myTestObj, type, ByteSizeType.BYTE_SIZE_MB);
     }
 
-    public void testSerializationShort(MyFile myFile, SerializationType type, ByteSizeType byteSizeType) {
+    public void testSerializationShort(MyTestObject myTestObj, SerializationType type, ByteSizeType byteSizeType) {
         for (int i = 0; i <= 4; i++) {
             int buffer = (int) Math.pow(2, i); // from the for it gives: 1, 2, 4, 8, 16
 
@@ -101,18 +101,18 @@ public class TestDecompression {
                     .originalSerialFileSizeBytes(originalSerialFileSizeBytes)
                     .createMeasure();
 
-            testSerializationByType(myFile, measure);
+            testSerializationByType(myTestObj, measure);
         }
     }
 
     /**
      * All combinations of buffer size for byteArrayOutputStream and gzipOutputStream, made by 2 for loops.
      *
-     * @param myFile
+     * @param myTestObj
      * @param type
      * @param byteSizeType
      */
-    public void testSerializationLong(MyFile myFile, SerializationType type, ByteSizeType byteSizeType) {
+    public void testSerializationLong(MyTestObject myTestObj, SerializationType type, ByteSizeType byteSizeType) {
 
         for (int i = 1; i <= 16; i++) {
             int buffer = i;
@@ -123,23 +123,23 @@ public class TestDecompression {
                     .originalSerialFileSizeBytes(originalSerialFileSizeBytes)
                     .createMeasure();
 
-            testSerializationByType(myFile, measure);
+            testSerializationByType(myTestObj, measure);
         }
     }
 
-    public void testSerializationByType(MyFile myFile, Measure measure) {
-        byte[] myFileBytes = SerializationUtils.serialize(myFile);
-        compressDecompress(myFile, measure, myFileBytes);
+    public void testSerializationByType(MyTestObject myTestObj, Measure measure) {
+        byte[] myTestObjBytes = SerializationUtils.serialize(myTestObj);
+        compressDecompress(myTestObj, measure, myTestObjBytes);
     }
 
-    private void compressDecompress(MyFile myFile, Measure measure, byte[] originalFileBytes) {
+    private void compressDecompress(MyTestObject myTestObj, Measure measure, byte[] originalFileBytes) {
 
         try {
             System.out.println("\n[WALLY] ########## Test compress and decompress: " + measure.fileDescription());
 
-            compressAndSerializeToFile(myFile, measure);
+            compressAndSerializeToFile(myTestObj, measure);
 
-            MyFile outputFile = UncompressAndDeserializeFromFile(measure);
+            MyTestObject outputFile = UncompressAndDeserializeFromFile(measure);
 
             byte[] outputFileBytes = SerializationUtils.serialize(outputFile);
 
@@ -156,19 +156,19 @@ public class TestDecompression {
         }
     }
 
-    private static void compressAndSerializeToFile(MyFile myFile, Measure measure) throws IOException {
+    private static void compressAndSerializeToFile(MyTestObject myTestObj, Measure measure) throws IOException {
         long start = System.nanoTime();
         File fileWrite = new File(TEST_PATH + "File_" + measure.fileDescription() + ".obj");
         System.out.println("Writing .obj file to path: " + fileWrite.getAbsolutePath());
         FileOutputStream fos = new FileOutputStream(fileWrite);
         BufferedOutputStream bufferedFos = new BufferedOutputStream(fos, measure.getBufferCompressCalculated());
         OutputStream os = instantiateOutputStreamByType(measure, bufferedFos);
-        serializeFile(myFile, measure, os);
+        serializeFile(myTestObj, measure, os);
         measure.setBytesCount(Files.size(fileWrite.toPath()));
         logDuration(start, measure, benchmarksCompress);
     }
 
-    private static MyFile UncompressAndDeserializeFromFile(Measure measure) throws IOException, ClassNotFoundException {
+    private static MyTestObject UncompressAndDeserializeFromFile(Measure measure) throws IOException, ClassNotFoundException {
         long start = System.nanoTime();
         File fileRead = new File(TEST_PATH + "File_" + measure.fileDescription() + ".obj");
         long bytes = Files.size(fileRead.toPath());
@@ -177,7 +177,7 @@ public class TestDecompression {
         BufferedInputStream bufferedFis = new BufferedInputStream(fis, measure.getBufferCompressCalculated());
         InputStream inStream = instantiateInputStreamByType(measure, bufferedFis);
         measure.setBytesCount(bytes);
-        MyFile outputFile = deserializeFile(inStream);
+        MyTestObject outputFile = deserializeFile(inStream);
         logDuration(start, measure, benchmarksUncompress);
         return outputFile;
     }

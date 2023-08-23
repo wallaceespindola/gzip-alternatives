@@ -71,12 +71,24 @@ public class SerializationTestUtils {
     }
 
     public static int calculateKbyteOrMegabyteBufferSize(ByteSizeType byteSizeType, int bufferSize) {
-        return byteSizeType == ByteSizeType.NONE ? 0 :
-                (byteSizeType == ByteSizeType.BYTE_SIZE_KB ? bufferSize * KB_SIZE : bufferSize * MB_SIZE);
+        return byteSizeType == ByteSizeType.NONE ? 0 : (byteSizeType == ByteSizeType.BYTE_SIZE_KB ? bufferSize * KB_SIZE : bufferSize * MB_SIZE);
     }
 
-    public MyFile saveAndRetrieveMyFile() {
-        System.out.println("[WALLY] START saveAndRetrieveMyFile");
+    public MyTestObject saveAndRetrieveMyTestObj() {
+        boolean textMode = true; // true = text mode, or false = byte mode
+        return saveAndRetrieveMyTestObj(textMode);
+    }
+
+    /**
+     * Save and retrieve MyTestObject. Serialization in disk of an object, in the modes:
+     * 1) Text mode, the object will contain a big text string.
+     * 2) Byte mode, the object will contain a big array of double.
+     *
+     * @param isTextMode if true: Text mode, MyTestObject will contain a big text string. If false: Byte mode, it will contain a big array of double.
+     * @return MyTestObject, with serialization in disk already done.
+     */
+    public MyTestObject saveAndRetrieveMyTestObj(boolean isTextMode) {
+        System.out.println("[WALLY] START saveAndRetrieveMyTestObj");
 
         // directory from where the program was launched
         String dir = System.getProperty("user.dir");
@@ -84,42 +96,57 @@ public class SerializationTestUtils {
 
         createTestDir();
 
-        String fileName = "test-file-20mb.txt";
-        //String fileName = "test-file-50mb.txt";
         String filePath = "./src/main/resources/";
-        String completeFilePath = filePath + fileName;
+        String objFileName = "test.obj";
 
-        File testFile = new File(completeFilePath);
-        System.out.println(">>>>> Test file " + (testFile.exists() ? "exists: " : "missing: ") + testFile.getAbsolutePath());
+        MyTestObject myTestObj = null;
 
-        MyFile myFile = new MyFile(getTextFromFilePath(testFile.getName()));
+        if (isTextMode) {
+            System.out.println(">>>>> Testing in TEXT_MODE");
+
+            String textFileName = "test-file-20mb.txt";
+            //String textFileName = "test-file-50mb.txt";
+
+            File textFile = new File(filePath + textFileName);
+            System.out.println(">>>>> Test text file " + (textFile.exists() ? "exists: " : "missing: ") + textFile.getAbsolutePath());
+            if (!textFile.exists()) {
+                System.out.println(CAUGHT_ERROR_PROCESSING + "Text file from disk : FILE NOT FOUND");
+            }
+
+            myTestObj = new MyTestObject(getTextFromFilePath(textFile.getName()));
+        } else {
+            System.out.println(">>>>> Testing in BYTE_MODE");
+            myTestObj = new MyTestObject(); // byte mode
+        }
 
         try {
-            if (testFile.exists()) {
-                // Serialize object in disk
-                serializeMyFile(completeFilePath, myFile);
-            } else {
-                System.out.println(CAUGHT_ERROR_PROCESSING + "test file from disk : FILE NOT FOUND");
-            }
-            System.out.println(">>>>> AFTER saveAndRetrieveMyFile : " + myFile);
+            // Serialize object in disk
+            serializeMyTestObj(filePath + objFileName, myTestObj);
+            System.out.println(">>>>> AFTER saveAndRetrieveMyTestObj : " + myTestObj);
         } catch (Exception ex) {
-            System.out.println(CAUGHT_ERROR_PROCESSING + "saveAndRetrieveMyFile : " + ex);
+            System.out.println(CAUGHT_ERROR_PROCESSING + "saveAndRetrieveMyTestObj : " + ex);
         }
-        System.out.println("[WALLY] END saveAndRetrieveMyFile");
+        System.out.println("[WALLY] END saveAndRetrieveMyTestObj");
 
-        return myFile;
+        return myTestObj;
     }
 
-    private void serializeMyFile(String completeFilePath, MyFile myFile) throws IOException {
+    /**
+     * Serialize object MyTestObject in disk
+     *
+     * @param completeFilePath
+     * @param myTestObj
+     * @throws IOException
+     */
+    private void serializeMyTestObj(String completeFilePath, MyTestObject myTestObj) throws IOException {
         FileOutputStream fos = new FileOutputStream(completeFilePath);
         ObjectOutputStream oos = new ObjectOutputStream(fos);
-        oos.writeObject(myFile);
+        oos.writeObject(myTestObj);
         oos.flush();
         oos.close();
-        byte[] objectBytes = SerializationUtils.serialize(myFile);
+        byte[] objectBytes = SerializationUtils.serialize(myTestObj);
         originalSerialFileSizeBytes = objectBytes.length;
-        System.out.println(">>>>> MyFile object serialized : " + originalSerialFileSizeBytes + " bytes ("
-                + FileUtils.byteCountToDisplaySize(originalSerialFileSizeBytes) + ") to path: " + completeFilePath);
+        System.out.println(">>>>> MyTestObject serialized : " + originalSerialFileSizeBytes + " bytes (" + FileUtils.byteCountToDisplaySize(originalSerialFileSizeBytes) + ") to path: " + completeFilePath);
     }
 
     public static void createTestDir() {
@@ -141,6 +168,7 @@ public class SerializationTestUtils {
                 txt.append(sCurrentLine + "\n");
             }
         } catch (IOException e) {
+            System.out.println(CAUGHT_ERROR_PROCESSING + "text file from disk");
             e.printStackTrace();
         }
         return txt.toString();
@@ -153,29 +181,22 @@ public class SerializationTestUtils {
             if (benchmarks.values().stream().anyMatch(measure -> measure.getType().equals(type))) {
                 System.out.println("\n[WALLY] ========== TOP 3 RESULTS " + type + ":" + addOptionalTitle(optionalTitle));
             }
-            benchmarks.values().stream().filter(measure -> measure.getType().equals(type)).limit(3)
-                    .forEach(measure -> System.out.println(measure.description()));
+            benchmarks.values().stream().filter(measure -> measure.getType().equals(type)).limit(3).forEach(measure -> System.out.println(measure.description()));
         }
 
         for (SerializationType type : SerializationType.values()) {
-            if (benchmarks.values().stream()
-                    .anyMatch(measure -> measure.getType().equals(type))) {
+            if (benchmarks.values().stream().anyMatch(measure -> measure.getType().equals(type))) {
                 System.out.println("\n[WALLY] >>>>>>>>>> TOP RESULT " + type + ":" + addOptionalTitle(optionalTitle));
             }
-            benchmarks.values().stream()
-                    .filter(measure -> measure.getType().equals(type)).limit(1)
-                    .forEach(measure -> System.out.println(measure.description()));
+            benchmarks.values().stream().filter(measure -> measure.getType().equals(type)).limit(1).forEach(measure -> System.out.println(measure.description()));
         }
 
         System.out.println("\n[WALLY] %%%%%%%%%% CSV RESULTS:" + addOptionalTitle(optionalTitle));
         System.out.println("Duration; Original MB; Actual MB; Original Bytes; Actual Bytes; Compression; Type;");
         Map<Long, Measure> benchmarksCsv = new TreeMap<>();
         for (SerializationType type : SerializationType.values()) {
-            benchmarks.values().stream()
-                    .sorted(Comparator.comparingLong(Measure::getElapsed)) // Sorted by duration
-                    .filter(measure -> measure.getType().equals(type))
-                    .limit(1)
-                    .forEach(measure -> benchmarksCsv.put(measure.getElapsed(), measure));
+            benchmarks.values().stream().sorted(Comparator.comparingLong(Measure::getElapsed)) // Sorted by duration
+                    .filter(measure -> measure.getType().equals(type)).limit(1).forEach(measure -> benchmarksCsv.put(measure.getElapsed(), measure));
         }
         // Not necessary to sort for TreeMap: .sorted(Comparator.comparingLong(Measure::getElapsed))
         benchmarksCsv.values().forEach(measure -> System.out.println(measure.csvDescription()));
@@ -611,36 +632,36 @@ public class SerializationTestUtils {
         System.out.println("[WALLY] " + description + " - executed in " + (elapsed / 1000000L) + " ms");
     }
 
-    public static void serializeFile(MyFile myFile, Measure measure, OutputStream os) {
+    public static void serializeFile(MyTestObject myTestObj, Measure measure, OutputStream os) {
         try {
             ObjectOutputStream oos = new ObjectOutputStream(os);
-            oos.writeObject(myFile);
+            oos.writeObject(myTestObj);
             oos.close();
         } catch (IOException ex) {
             System.out.println(CAUGHT_ERROR_PROCESSING + " serialization of " + measure + " : " + ex);
         }
     }
 
-    public static MyFile deserializeFile(InputStream inStream) throws IOException, ClassNotFoundException {
+    public static MyTestObject deserializeFile(InputStream inStream) throws IOException, ClassNotFoundException {
         ObjectInputStream objectInputStream = new ObjectInputStream(inStream);
-        MyFile outputFile = (MyFile) objectInputStream.readObject();
+        MyTestObject outputFile = (MyTestObject) objectInputStream.readObject();
         objectInputStream.close();
         return outputFile;
     }
 
-    public void testSerializationByType(MyFile myFile, Measure measure) {
-        byte[] myFileBytes = SerializationUtils.serialize(myFile);
-        compressDecompress(myFile, measure, myFileBytes);
+    public void testSerializationByType(MyTestObject myTestObj, Measure measure) {
+        byte[] myTestObjBytes = SerializationUtils.serialize(myTestObj);
+        compressDecompress(myTestObj, measure, myTestObjBytes);
     }
 
-    public void compressDecompress(MyFile myFile, Measure measure, byte[] originalFileBytes) {
+    public void compressDecompress(MyTestObject myTestObj, Measure measure, byte[] originalFileBytes) {
 
         try {
             System.out.println("\n[WALLY] ########## Test compress and decompress: " + measure.fileDescription());
 
-            compressAndSerializeToFile(myFile, measure);
+            compressAndSerializeToFile(myTestObj, measure);
 
-            MyFile outputFile = UncompressAndDeserializeFromFile(measure);
+            MyTestObject outputFile = UncompressAndDeserializeFromFile(measure);
 
             byte[] outputFileBytes = SerializationUtils.serialize(outputFile);
 
@@ -657,19 +678,19 @@ public class SerializationTestUtils {
         }
     }
 
-    public static void compressAndSerializeToFile(MyFile myFile, Measure measure) throws IOException {
+    public static void compressAndSerializeToFile(MyTestObject myTestObj, Measure measure) throws IOException {
         long start = System.nanoTime();
         File fileWrite = new File(TEST_PATH + "File_" + measure.fileDescription() + ".obj");
         System.out.println("Writing .obj file to path: " + fileWrite.getAbsolutePath());
         FileOutputStream fos = new FileOutputStream(fileWrite);
         BufferedOutputStream bufferedFos = new BufferedOutputStream(fos, measure.getBufferCompressCalculated());
         OutputStream os = instantiateOutputStreamByType(measure, bufferedFos);
-        serializeFile(myFile, measure, os);
+        serializeFile(myTestObj, measure, os);
         measure.setBytesCount(Files.size(fileWrite.toPath()));
         logDuration(start, measure.getType().name());
     }
 
-    public static MyFile UncompressAndDeserializeFromFile(Measure measure) throws IOException, ClassNotFoundException {
+    public static MyTestObject UncompressAndDeserializeFromFile(Measure measure) throws IOException, ClassNotFoundException {
         long start = System.nanoTime();
         File fileRead = new File(TEST_PATH + "File_" + measure.fileDescription() + ".obj");
         long bytes = Files.size(fileRead.toPath());
@@ -678,7 +699,7 @@ public class SerializationTestUtils {
         BufferedInputStream bufferedFis = new BufferedInputStream(fis, measure.getBufferCompressCalculated());
         InputStream inStream = instantiateInputStreamByType(measure, bufferedFis);
         measure.setBytesCount(bytes);
-        MyFile outputFile = deserializeFile(inStream);
+        MyTestObject outputFile = deserializeFile(inStream);
         logDuration(start, measure.getType().name());
         return outputFile;
     }

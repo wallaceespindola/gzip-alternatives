@@ -36,22 +36,24 @@ public class TestCompression {
         TestCompression test = new TestCompression();
         SerializationTestUtils testUtils = new SerializationTestUtils();
 
-        MyFile myFile = testUtils.saveAndRetrieveMyFile();
+        boolean isTextMode = true; // Test modes: true = textMode, false = byteMode
+
+        MyTestObject myTestObj = testUtils.saveAndRetrieveMyTestObj(isTextMode);
         test.setOriginalSerialFileSizeBytes(testUtils.getOriginalSerialFileSizeBytes());
 
-        EnumSet<SerializationType> serializationType = SerializationType.LZ4_TYPES; // Change it to have other serialization tests
+        EnumSet<SerializationType> serializationType = SerializationType.BROTLI_FAST_TYPES; // Change it to have other serialization tests
         TestType testType = TestType.SHORT; // Change it to have other test types
 
         System.out.println("\n[WALLY] ########## TESTING TYPE: " + testType);
         switch (testType) {
             case SHORT:
-                serializationType.forEach(serialType -> test.testShortSerialization(myFile, serialType));
+                serializationType.forEach(serialType -> test.testShortSerialization(myTestObj, serialType));
                 break;
             case STANDARD:
-                serializationType.forEach(serialType -> test.testStandardSerialization(myFile, serialType));
+                serializationType.forEach(serialType -> test.testStandardSerialization(myTestObj, serialType));
                 break;
             case LONG:
-                serializationType.forEach(serialType -> test.testStandardSerializationLong(myFile, serialType));
+                serializationType.forEach(serialType -> test.testStandardSerializationLong(myTestObj, serialType));
                 break;
             default:
                 System.out.println(WARNING_NOT_A_KNOWN_TYPE);
@@ -69,44 +71,44 @@ public class TestCompression {
     /**
      * Test for Gzip all combinations: KB x MB buffers
      *
-     * @param myFile
+     * @param myTestObj
      * @param type
      */
-    public void testStandardSerialization(MyFile myFile, SerializationType type) {
+    public void testStandardSerialization(MyTestObject myTestObj, SerializationType type) {
         System.out.println(STARTING_TEST + type);
-        testStandardSerialization(myFile, type, ByteSizeType.BYTE_SIZE_KB, ByteSizeType.BYTE_SIZE_KB);
-        testStandardSerialization(myFile, type, ByteSizeType.BYTE_SIZE_KB, ByteSizeType.BYTE_SIZE_MB);
-        testStandardSerialization(myFile, type, ByteSizeType.BYTE_SIZE_MB, ByteSizeType.BYTE_SIZE_KB);
-        testStandardSerialization(myFile, type, ByteSizeType.BYTE_SIZE_MB, ByteSizeType.BYTE_SIZE_MB);
+        testStandardSerialization(myTestObj, type, ByteSizeType.BYTE_SIZE_KB, ByteSizeType.BYTE_SIZE_KB);
+        testStandardSerialization(myTestObj, type, ByteSizeType.BYTE_SIZE_KB, ByteSizeType.BYTE_SIZE_MB);
+        testStandardSerialization(myTestObj, type, ByteSizeType.BYTE_SIZE_MB, ByteSizeType.BYTE_SIZE_KB);
+        testStandardSerialization(myTestObj, type, ByteSizeType.BYTE_SIZE_MB, ByteSizeType.BYTE_SIZE_MB);
     }
 
     /**
      * Test for Gzip long all combinations: KB x MB buffers
      *
-     * @param myFile
+     * @param myTestObj
      * @param type
      */
-    public void testStandardSerializationLong(MyFile myFile, SerializationType type) {
+    public void testStandardSerializationLong(MyTestObject myTestObj, SerializationType type) {
         System.out.println(STARTING_TEST + type);
-        testStandardSerializationLong(myFile, type, ByteSizeType.BYTE_SIZE_KB, ByteSizeType.BYTE_SIZE_KB);
-        testStandardSerializationLong(myFile, type, ByteSizeType.BYTE_SIZE_KB, ByteSizeType.BYTE_SIZE_MB);
-        testStandardSerializationLong(myFile, type, ByteSizeType.BYTE_SIZE_MB, ByteSizeType.BYTE_SIZE_KB);
-        testStandardSerializationLong(myFile, type, ByteSizeType.BYTE_SIZE_MB, ByteSizeType.BYTE_SIZE_MB);
+        testStandardSerializationLong(myTestObj, type, ByteSizeType.BYTE_SIZE_KB, ByteSizeType.BYTE_SIZE_KB);
+        testStandardSerializationLong(myTestObj, type, ByteSizeType.BYTE_SIZE_KB, ByteSizeType.BYTE_SIZE_MB);
+        testStandardSerializationLong(myTestObj, type, ByteSizeType.BYTE_SIZE_MB, ByteSizeType.BYTE_SIZE_KB);
+        testStandardSerializationLong(myTestObj, type, ByteSizeType.BYTE_SIZE_MB, ByteSizeType.BYTE_SIZE_MB);
     }
 
     /**
      * Test simplified symmetric combination for buffers: KB-KB, MB-MB
      *
-     * @param myFile
+     * @param myTestObj
      * @param type
      */
-    public void testShortSerialization(MyFile myFile, SerializationType type) {
+    public void testShortSerialization(MyTestObject myTestObj, SerializationType type) {
         System.out.println(STARTING_TEST + type);
-        testShortSerialization(myFile, type, ByteSizeType.BYTE_SIZE_KB);
-        testShortSerialization(myFile, type, ByteSizeType.BYTE_SIZE_MB);
+        testShortSerialization(myTestObj, type, ByteSizeType.BYTE_SIZE_KB);
+        testShortSerialization(myTestObj, type, ByteSizeType.BYTE_SIZE_MB);
     }
 
-    public void testShortSerialization(MyFile myFile, SerializationType type, ByteSizeType byteSizeType) {
+    public void testShortSerialization(MyTestObject myTestObj, SerializationType type, ByteSizeType byteSizeType) {
         for (int i = 0; i <= 4; i++) {
             int buffer = (int) Math.pow(2, i); // from the for it gives: 1, 2, 4, 8, 16
 
@@ -117,11 +119,11 @@ public class TestCompression {
                     .originalSerialFileSizeBytes(originalSerialFileSizeBytes)
                     .createMeasure();
 
-            testSerializationByType(myFile, measure);
+            testSerializationByType(myTestObj, measure);
         }
     }
 
-    public void testStandardSerialization(MyFile myFile, SerializationType type,
+    public void testStandardSerialization(MyTestObject myTestObj, SerializationType type,
                                           ByteSizeType byteArrayOutputStreamType, ByteSizeType gzipOutputStreamType) {
         for (int i = 0; i <= 4; i++) {
             int bufferByteArray = (int) Math.pow(2, i); // from the for it gives: 1, 2, 4, 8, 16
@@ -138,7 +140,7 @@ public class TestCompression {
                         .originalSerialFileSizeBytes(originalSerialFileSizeBytes)
                         .createMeasure();
 
-                testSerializationByType(myFile, measure);
+                testSerializationByType(myTestObj, measure);
             }
         }
     }
@@ -146,12 +148,12 @@ public class TestCompression {
     /**
      * All combinations of buffer size for byteArrayOutputStream and gzipOutputStream, made by 2 for loops.
      *
-     * @param myFile
+     * @param myTestObj
      * @param type
      * @param byteArrayOutputStreamType
      * @param gzipOutputStreamType
      */
-    public void testStandardSerializationLong(MyFile myFile, SerializationType type,
+    public void testStandardSerializationLong(MyTestObject myTestObj, SerializationType type,
                                               ByteSizeType byteArrayOutputStreamType, ByteSizeType gzipOutputStreamType) {
         int byteArrayBufferSize, gzipBufferSize;
 
@@ -169,12 +171,12 @@ public class TestCompression {
                         .originalSerialFileSizeBytes(originalSerialFileSizeBytes)
                         .createMeasure();
 
-                testSerializationByType(myFile, measure);
+                testSerializationByType(myTestObj, measure);
             }
         }
     }
 
-    public void testByteArrayOutputStream(MyFile myFile) {
+    public void testByteArrayOutputStream(MyTestObject myTestObj) {
         int bufferSize;
         for (int i = 1; i <= 16; i++) {
             bufferSize = i;
@@ -184,7 +186,7 @@ public class TestCompression {
                     .bufferByteArraySizeType(ByteSizeType.BYTE_SIZE_KB)
                     .originalSerialFileSizeBytes(originalSerialFileSizeBytes)
                     .createMeasure();
-            testByteArraySerialization(myFile, measure);
+            testByteArraySerialization(myTestObj, measure);
         }
         for (int i = 1; i <= 16; i++) {
             bufferSize = i;
@@ -194,33 +196,33 @@ public class TestCompression {
                     .bufferByteArraySizeType(ByteSizeType.BYTE_SIZE_MB)
                     .originalSerialFileSizeBytes(originalSerialFileSizeBytes)
                     .createMeasure();
-            testByteArraySerialization(myFile, measure);
+            testByteArraySerialization(myTestObj, measure);
         }
     }
 
-    public void testByteArraySerialization(MyFile myFile, Measure measure) {
+    public void testByteArraySerialization(MyTestObject myTestObj, Measure measure) {
         long start = System.nanoTime();
         ByteArrayOutputStream baos = new ByteArrayOutputStream(measure.getBufferByteArrayCalculated());
-        serializeFile(myFile, measure, baos);
+        serializeFile(myTestObj, measure, baos);
         measure.setBytesCount(baos.size());
         logDuration(start, measure, benchmarks);
     }
 
-    public void testSerializationByType(MyFile myFile, Measure measure) {
+    public void testSerializationByType(MyTestObject myTestObj, Measure measure) {
         long start = System.nanoTime();
         ByteArrayOutputStream baos = new ByteArrayOutputStream(measure.getBufferByteArrayCalculated());
         OutputStream os = instantiateOutputStreamByMeasureType(measure, baos);
-        serializeFile(myFile, measure, os);
+        serializeFile(myTestObj, measure, os);
         measure.setBytesCount(baos.size());
         logDuration(start, measure, benchmarks);
     }
 
-    public void testGzipSerialization(MyFile myFile, Measure measure) {
+    public void testGzipSerialization(MyTestObject myTestObj, Measure measure) {
         try {
             long start = System.nanoTime();
             ByteArrayOutputStream baos = new ByteArrayOutputStream(measure.getBufferByteArrayCalculated());
             GZIPOutputStream os = new GZIPOutputStream(baos, measure.getBufferCompressCalculated());
-            serializeFile(myFile, measure, os);
+            serializeFile(myTestObj, measure, os);
             measure.setBytesCount(baos.size());
             logDuration(start, measure, benchmarks);
         } catch (IOException ex) {
@@ -228,12 +230,12 @@ public class TestCompression {
         }
     }
 
-    public void testParallelGzipSerialization(MyFile myFile, Measure measure) {
+    public void testParallelGzipSerialization(MyTestObject myTestObj, Measure measure) {
         try {
             long start = System.nanoTime();
             ByteArrayOutputStream baos = new ByteArrayOutputStream(measure.getBufferByteArrayCalculated());
             ParallelGZIPOutputStream os = new ParallelGZIPOutputStream(baos, measure.getBufferCompressCalculated());
-            serializeFile(myFile, measure, os);
+            serializeFile(myTestObj, measure, os);
             measure.setBytesCount(baos.size());
             logDuration(start, measure, benchmarks);
         } catch (IOException ex) {

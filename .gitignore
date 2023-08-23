@@ -4,6 +4,12 @@
 # Log file
 *.log
 
+# Serial object files
+*.obj
+*.lz4
+*.p200
+*.btl
+
 # Package Files #
 *.jar
 *.war
