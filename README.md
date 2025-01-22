@@ -2,6 +2,10 @@
 
 # GZIP Alternatives Benchmark
 
+![Apache 2.0 License](https://img.shields.io/badge/License-Apache2.0-orange)
+![Java](https://img.shields.io/badge/Built_with-Java-blue)
+![Maven](https://img.shields.io/badge/Powered_by-Maven-green)
+
 GZIP Alternatives Compression and Decompression Benchmarks.
 
 Studying the possibilities faster than GZIP for streams.
