@@ -5,6 +5,7 @@
 ![Apache 2.0 License](https://img.shields.io/badge/License-Apache2.0-orange)
 ![Java](https://img.shields.io/badge/Built_with-Java-blue)
 ![Maven](https://img.shields.io/badge/Powered_by-Maven-green)
+![Build Status](https://github.com/wallaceespindola/gzip-alternatives/actions/workflows/maven.yml/badge.svg)
 
 ## Purpose
 
