@@ -4,7 +4,6 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 
 public class Benchmark {
 
@@ -33,7 +32,8 @@ public class Benchmark {
         }
         elapsed = System.nanoTime() - start;
         System.out.println("STD " + count.count +
-                " bytes (" + FileUtils.byteCountToDisplaySize(count.count) + ") written in " + (elapsed / 1000000L) + "ms");
+                " bytes (" + FileUtils.byteCountToDisplaySize(count.count) + ") written in " + (elapsed / 1000000L)
+                + "ms");
     }
 
     public static void test2() throws Exception {
@@ -49,20 +49,13 @@ public class Benchmark {
             try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
                 oos.writeObject(obj);
             }
-            //baos.reset();
+            // baos.reset();
         }
         elapsed = System.nanoTime() - start;
-        //System.out.println("STD :" + (elapsed / 1000000L) + "ms");
+        // System.out.println("STD :" + (elapsed / 1000000L) + "ms");
         System.out.println("STD " + baos.size() +
-                " bytes (" + FileUtils.byteCountToDisplaySize(baos.size()) + ") written in " + (elapsed / 1000000L) + "ms");
+                " bytes (" + FileUtils.byteCountToDisplaySize(baos.size()) + ") written in " + (elapsed / 1000000L)
+                + "ms");
     }
 
-    public static class CountingOutputStream extends OutputStream {
-        public long count = 0;
-
-        @Override
-        public void write(int b) {
-            count++;
-        }
-    }
 }

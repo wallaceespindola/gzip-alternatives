@@ -71,7 +71,8 @@ public class SerializationTestUtils {
     }
 
     public static int calculateKbyteOrMegabyteBufferSize(ByteSizeType byteSizeType, int bufferSize) {
-        return byteSizeType == ByteSizeType.NONE ? 0 : (byteSizeType == ByteSizeType.BYTE_SIZE_KB ? bufferSize * KB_SIZE : bufferSize * MB_SIZE);
+        return byteSizeType == ByteSizeType.NONE ? 0
+                : (byteSizeType == ByteSizeType.BYTE_SIZE_KB ? bufferSize * KB_SIZE : bufferSize * MB_SIZE);
     }
 
     public MyTestObject saveAndRetrieveMyTestObj() {
@@ -80,11 +81,14 @@ public class SerializationTestUtils {
     }
 
     /**
-     * Save and retrieve MyTestObject. Serialization in disk of an object, in the modes:
+     * Save and retrieve MyTestObject. Serialization in disk of an object, in the
+     * modes:
      * 1) Text mode, the object will contain a big text string.
      * 2) Byte mode, the object will contain a big array of double.
      *
-     * @param isTextMode if true: Text mode, MyTestObject will contain a big text string. If false: Byte mode, it will contain a big array of double.
+     * @param isTextMode if true: Text mode, MyTestObject will contain a big text
+     *                   string. If false: Byte mode, it will contain a big array of
+     *                   double.
      * @return MyTestObject, with serialization in disk already done.
      */
     public MyTestObject saveAndRetrieveMyTestObj(boolean isTextMode) {
@@ -105,10 +109,11 @@ public class SerializationTestUtils {
             System.out.println(">>>>> Testing in TEXT_MODE");
 
             String textFileName = "test-file-20mb.txt";
-            //String textFileName = "test-file-50mb.txt";
+            // String textFileName = "test-file-50mb.txt";
 
             File textFile = new File(filePath + textFileName);
-            System.out.println(">>>>> Test text file " + (textFile.exists() ? "exists: " : "missing: ") + textFile.getAbsolutePath());
+            System.out.println(">>>>> Test text file " + (textFile.exists() ? "exists: " : "missing: ")
+                    + textFile.getAbsolutePath());
             if (!textFile.exists()) {
                 System.out.println(CAUGHT_ERROR_PROCESSING + "Text file from disk : FILE NOT FOUND");
             }
@@ -146,7 +151,8 @@ public class SerializationTestUtils {
         oos.close();
         byte[] objectBytes = SerializationUtils.serialize(myTestObj);
         originalSerialFileSizeBytes = objectBytes.length;
-        System.out.println(">>>>> MyTestObject serialized : " + originalSerialFileSizeBytes + " bytes (" + FileUtils.byteCountToDisplaySize(originalSerialFileSizeBytes) + ") to path: " + completeFilePath);
+        System.out.println(">>>>> MyTestObject serialized : " + originalSerialFileSizeBytes + " bytes ("
+                + FileUtils.byteCountToDisplaySize(originalSerialFileSizeBytes) + ") to path: " + completeFilePath);
     }
 
     public static void createTestDir() {
@@ -175,20 +181,24 @@ public class SerializationTestUtils {
     }
 
     public void printBenchmarks(Map<Long, Measure> benchmarks, String... optionalTitle) {
-        System.out.println("\n[WALLY] ###################### PRINT BENCHMARKS:" + addOptionalTitle(optionalTitle) + " ######################");
+        System.out.println("\n[WALLY] ###################### PRINT BENCHMARKS:" + addOptionalTitle(optionalTitle)
+                + " ######################");
 
         for (SerializationType type : SerializationType.values()) {
             if (benchmarks.values().stream().anyMatch(measure -> measure.getType().equals(type))) {
-                System.out.println("\n[WALLY] ========== TOP 3 RESULTS " + type + ":" + addOptionalTitle(optionalTitle));
+                System.out
+                        .println("\n[WALLY] ========== TOP 3 RESULTS " + type + ":" + addOptionalTitle(optionalTitle));
             }
-            benchmarks.values().stream().filter(measure -> measure.getType().equals(type)).limit(3).forEach(measure -> System.out.println(measure.description()));
+            benchmarks.values().stream().filter(measure -> measure.getType().equals(type)).limit(3)
+                    .forEach(measure -> System.out.println(measure.description()));
         }
 
         for (SerializationType type : SerializationType.values()) {
             if (benchmarks.values().stream().anyMatch(measure -> measure.getType().equals(type))) {
                 System.out.println("\n[WALLY] >>>>>>>>>> TOP RESULT " + type + ":" + addOptionalTitle(optionalTitle));
             }
-            benchmarks.values().stream().filter(measure -> measure.getType().equals(type)).limit(1).forEach(measure -> System.out.println(measure.description()));
+            benchmarks.values().stream().filter(measure -> measure.getType().equals(type)).limit(1)
+                    .forEach(measure -> System.out.println(measure.description()));
         }
 
         System.out.println("\n[WALLY] %%%%%%%%%% CSV RESULTS:" + addOptionalTitle(optionalTitle));
@@ -196,23 +206,16 @@ public class SerializationTestUtils {
         Map<Long, Measure> benchmarksCsv = new TreeMap<>();
         for (SerializationType type : SerializationType.values()) {
             benchmarks.values().stream().sorted(Comparator.comparingLong(Measure::getElapsed)) // Sorted by duration
-                    .filter(measure -> measure.getType().equals(type)).limit(1).forEach(measure -> benchmarksCsv.put(measure.getElapsed(), measure));
+                    .filter(measure -> measure.getType().equals(type)).limit(1)
+                    .forEach(measure -> benchmarksCsv.put(measure.getElapsed(), measure));
         }
-        // Not necessary to sort for TreeMap: .sorted(Comparator.comparingLong(Measure::getElapsed))
+        // Not necessary to sort for TreeMap:
+        // .sorted(Comparator.comparingLong(Measure::getElapsed))
         benchmarksCsv.values().forEach(measure -> System.out.println(measure.csvDescription()));
     }
 
     private static String addOptionalTitle(String... optionalTitle) {
         return (optionalTitle.length > 0 && StringUtils.isNotBlank(optionalTitle[0])) ? " " + optionalTitle[0] : "";
-    }
-
-    public static class CountingOutputStream extends OutputStream {
-        public long count = 0;
-
-        @Override
-        public void write(int b) {
-            count++;
-        }
     }
 
     public static OutputStream instantiateOutputStreamByType(SerializationType serialType, FileOutputStream fos) {
@@ -273,7 +276,8 @@ public class SerializationTestUtils {
                     return fos;
             }
         } catch (IOException ex) {
-            System.out.println(SerializationTestUtils.CAUGHT_ERROR_PROCESSING + serialType + " instantiateOutputStreamByType : " + ex);
+            System.out.println(SerializationTestUtils.CAUGHT_ERROR_PROCESSING + serialType
+                    + " instantiateOutputStreamByType : " + ex);
         }
         return null;
     }
@@ -332,13 +336,15 @@ public class SerializationTestUtils {
                 case LZ4_ORG_FRAME:
                     return new LZ4FrameOutputStream(fos);
                 case BYTE_ARRAY:
-                    // No compression output stream added, but need to adapt measure object to make sure it is consistent
+                    // No compression output stream added, but need to adapt measure object to make
+                    // sure it is consistent
                     measure.cleanBufferCompress();
                     measure.cleanBufferCompressSizeType();
                     return fos;
             }
         } catch (IOException ex) {
-            System.out.println(SerializationTestUtils.CAUGHT_ERROR_PROCESSING + measure.getType() + " instantiateOutputStreamByType : " + ex);
+            System.out.println(SerializationTestUtils.CAUGHT_ERROR_PROCESSING + measure.getType()
+                    + " instantiateOutputStreamByType : " + ex);
         }
         return null;
     }
@@ -400,7 +406,8 @@ public class SerializationTestUtils {
                     return fis;
             }
         } catch (IOException ex) {
-            System.out.println(SerializationTestUtils.CAUGHT_ERROR_PROCESSING + serialType + " instantiateInputStreamByType : " + ex);
+            System.out.println(SerializationTestUtils.CAUGHT_ERROR_PROCESSING + serialType
+                    + " instantiateInputStreamByType : " + ex);
         }
         return null;
     }
@@ -462,14 +469,16 @@ public class SerializationTestUtils {
                     return bis;
             }
         } catch (IOException ex) {
-            System.out.println(SerializationTestUtils.CAUGHT_ERROR_PROCESSING + measure.getType() + " instantiateInputStreamByType : " + ex);
+            System.out.println(SerializationTestUtils.CAUGHT_ERROR_PROCESSING + measure.getType()
+                    + " instantiateInputStreamByType : " + ex);
         }
         return null;
     }
 
     /**
      * Instantiate the OutputStream by type SerializationType.
-     * Pay attention that it is not always possible to pass the Buffer Compress Size as input parameter.
+     * Pay attention that it is not always possible to pass the Buffer Compress Size
+     * as input parameter.
      *
      * @param measure the Measure
      * @param baos    the ByteArrayOutputStream
@@ -529,7 +538,8 @@ public class SerializationTestUtils {
                 case LZ4_ORG_FRAME:
                     return new LZ4FrameOutputStream(baos);
                 case BYTE_ARRAY:
-                    // No compression output stream added, but need to adapt measure object to make sure it is consistent
+                    // No compression output stream added, but need to adapt measure object to make
+                    // sure it is consistent
                     measure.cleanBufferCompress();
                     measure.cleanBufferCompressSizeType();
                     return baos;
@@ -540,83 +550,106 @@ public class SerializationTestUtils {
         return null;
     }
 
-    private static BrotliOutputStream getBrotli4jOutputStream(Measure measure, ByteArrayOutputStream baos, int quality) throws IOException {
+    private static BrotliOutputStream getBrotli4jOutputStream(Measure measure, ByteArrayOutputStream baos, int quality)
+            throws IOException {
         // Load the native library
         Brotli4jLoader.ensureAvailability();
-        // If being used to compress streams in real-time, I do not advise a quality setting above 4 due to performance
+        // If being used to compress streams in real-time, I do not advise a quality
+        // setting above 4 due to performance
         Encoder.Parameters bp = new Encoder.Parameters().setQuality(quality);
         return new BrotliOutputStream(baos, bp, measure.getBufferCompressCalculated());
     }
 
-    private static BrotliOutputStream getBrotli4jOutputStream(Measure measure, BufferedOutputStream bos, int quality) throws IOException {
+    private static BrotliOutputStream getBrotli4jOutputStream(Measure measure, BufferedOutputStream bos, int quality)
+            throws IOException {
         // Load the native library
         Brotli4jLoader.ensureAvailability();
-        // If being used to compress streams in real-time, I do not advise a quality setting above 4 due to performance
+        // If being used to compress streams in real-time, I do not advise a quality
+        // setting above 4 due to performance
         Encoder.Parameters bp = new Encoder.Parameters().setQuality(quality);
         return new BrotliOutputStream(bos, bp, measure.getBufferCompressCalculated());
     }
 
-    private static com.nixxcode.jvmbrotli.enc.BrotliOutputStream getJvmBrotliOutputStream(Measure measure, ByteArrayOutputStream baos, int quality) throws IOException {
+    private static com.nixxcode.jvmbrotli.enc.BrotliOutputStream getJvmBrotliOutputStream(Measure measure,
+            ByteArrayOutputStream baos, int quality) throws IOException {
         // Load the native library
         com.nixxcode.jvmbrotli.common.BrotliLoader.isBrotliAvailable();
-        // If being used to compress streams in real-time, I do not advise a quality setting above 4 due to performance
-        com.nixxcode.jvmbrotli.enc.Encoder.Parameters jbp = new com.nixxcode.jvmbrotli.enc.Encoder.Parameters().setQuality(quality);
+        // If being used to compress streams in real-time, I do not advise a quality
+        // setting above 4 due to performance
+        com.nixxcode.jvmbrotli.enc.Encoder.Parameters jbp = new com.nixxcode.jvmbrotli.enc.Encoder.Parameters()
+                .setQuality(quality);
         return new com.nixxcode.jvmbrotli.enc.BrotliOutputStream(baos, jbp, measure.getBufferCompressCalculated());
     }
 
-    private static com.nixxcode.jvmbrotli.enc.BrotliOutputStream getJvmBrotliOutputStream(Measure measure, BufferedOutputStream bos, int quality) throws IOException {
+    private static com.nixxcode.jvmbrotli.enc.BrotliOutputStream getJvmBrotliOutputStream(Measure measure,
+            BufferedOutputStream bos, int quality) throws IOException {
         // Load the native library
         com.nixxcode.jvmbrotli.common.BrotliLoader.isBrotliAvailable();
-        // If being used to compress streams in real-time, I do not advise a quality setting above 4 due to performance
-        com.nixxcode.jvmbrotli.enc.Encoder.Parameters jbp = new com.nixxcode.jvmbrotli.enc.Encoder.Parameters().setQuality(quality);
+        // If being used to compress streams in real-time, I do not advise a quality
+        // setting above 4 due to performance
+        com.nixxcode.jvmbrotli.enc.Encoder.Parameters jbp = new com.nixxcode.jvmbrotli.enc.Encoder.Parameters()
+                .setQuality(quality);
         return new com.nixxcode.jvmbrotli.enc.BrotliOutputStream(bos, jbp, measure.getBufferCompressCalculated());
     }
 
     private static BrotliInputStream getBrotli4jInputStream(FileInputStream fis, int quality) throws IOException {
         // Load the native library
         Brotli4jLoader.ensureAvailability();
-        // If being used to compress streams in real-time, I do not advise a quality setting above 4 due to performance
+        // If being used to compress streams in real-time, I do not advise a quality
+        // setting above 4 due to performance
         Encoder.Parameters bp = new Encoder.Parameters().setQuality(quality);
         return new BrotliInputStream(fis, KB_SIZE);
     }
 
-    private static BrotliInputStream getBrotli4jInputStream(Measure measure, BufferedInputStream bis, int quality) throws IOException {
+    private static BrotliInputStream getBrotli4jInputStream(Measure measure, BufferedInputStream bis, int quality)
+            throws IOException {
         // Load the native library
         Brotli4jLoader.ensureAvailability();
-        // If being used to compress streams in real-time, I do not advise a quality setting above 4 due to performance
+        // If being used to compress streams in real-time, I do not advise a quality
+        // setting above 4 due to performance
         Encoder.Parameters bp = new Encoder.Parameters().setQuality(quality);
         return new BrotliInputStream(bis, measure.getBufferCompressCalculated());
     }
 
-    private static com.nixxcode.jvmbrotli.dec.BrotliInputStream getJvmBrotliInputStream(FileInputStream fis, int quality) throws IOException {
+    private static com.nixxcode.jvmbrotli.dec.BrotliInputStream getJvmBrotliInputStream(FileInputStream fis,
+            int quality) throws IOException {
         // Load the native library
         com.nixxcode.jvmbrotli.common.BrotliLoader.isBrotliAvailable();
-        // If being used to compress streams in real-time, I do not advise a quality setting above 4 due to performance
-        com.nixxcode.jvmbrotli.enc.Encoder.Parameters jbp = new com.nixxcode.jvmbrotli.enc.Encoder.Parameters().setQuality(quality);
+        // If being used to compress streams in real-time, I do not advise a quality
+        // setting above 4 due to performance
+        com.nixxcode.jvmbrotli.enc.Encoder.Parameters jbp = new com.nixxcode.jvmbrotli.enc.Encoder.Parameters()
+                .setQuality(quality);
         return new com.nixxcode.jvmbrotli.dec.BrotliInputStream(fis, KB_SIZE);
     }
 
-    private static com.nixxcode.jvmbrotli.dec.BrotliInputStream getJvmBrotliInputStream(Measure measure, BufferedInputStream bis, int quality) throws IOException {
+    private static com.nixxcode.jvmbrotli.dec.BrotliInputStream getJvmBrotliInputStream(Measure measure,
+            BufferedInputStream bis, int quality) throws IOException {
         // Load the native library
         com.nixxcode.jvmbrotli.common.BrotliLoader.isBrotliAvailable();
-        // If being used to compress streams in real-time, I do not advise a quality setting above 4 due to performance
-        com.nixxcode.jvmbrotli.enc.Encoder.Parameters jbp = new com.nixxcode.jvmbrotli.enc.Encoder.Parameters().setQuality(quality);
+        // If being used to compress streams in real-time, I do not advise a quality
+        // setting above 4 due to performance
+        com.nixxcode.jvmbrotli.enc.Encoder.Parameters jbp = new com.nixxcode.jvmbrotli.enc.Encoder.Parameters()
+                .setQuality(quality);
         return new com.nixxcode.jvmbrotli.dec.BrotliInputStream(bis, measure.getBufferCompressCalculated());
     }
 
     private static BrotliOutputStream getBrotli4jOutputStream(FileOutputStream fos, int quality) throws IOException {
         // Load the native library
         Brotli4jLoader.ensureAvailability();
-        // If being used to compress streams in real-time, I do not advise a quality setting above 4 due to performance
+        // If being used to compress streams in real-time, I do not advise a quality
+        // setting above 4 due to performance
         Encoder.Parameters bp = new Encoder.Parameters().setQuality(quality);
         return new BrotliOutputStream(fos, bp, KB_SIZE);
     }
 
-    private static com.nixxcode.jvmbrotli.enc.BrotliOutputStream getJvmBrotliOutputStream(FileOutputStream fos, int quality) throws IOException {
+    private static com.nixxcode.jvmbrotli.enc.BrotliOutputStream getJvmBrotliOutputStream(FileOutputStream fos,
+            int quality) throws IOException {
         // Load the native library
         com.nixxcode.jvmbrotli.common.BrotliLoader.isBrotliAvailable();
-        // If being used to compress streams in real-time, I do not advise a quality setting above 4 due to performance
-        com.nixxcode.jvmbrotli.enc.Encoder.Parameters jbp = new com.nixxcode.jvmbrotli.enc.Encoder.Parameters().setQuality(quality);
+        // If being used to compress streams in real-time, I do not advise a quality
+        // setting above 4 due to performance
+        com.nixxcode.jvmbrotli.enc.Encoder.Parameters jbp = new com.nixxcode.jvmbrotli.enc.Encoder.Parameters()
+                .setQuality(quality);
         return new com.nixxcode.jvmbrotli.enc.BrotliOutputStream(fos, jbp, KB_SIZE);
     }
 
@@ -671,7 +704,8 @@ public class SerializationTestUtils {
             System.out.println("Byte array comparison: " + Arrays.equals(originalFileBytes, outputFileBytes));
 
             if (!Arrays.equals(originalFileBytes, outputFileBytes)) { // LOG assertion
-                System.out.println(CAUGHT_ERROR_PROCESSING + measure.getType() + " : Byte arrays in and out should be equal !!!");
+                System.out.println(
+                        CAUGHT_ERROR_PROCESSING + measure.getType() + " : Byte arrays in and out should be equal !!!");
             }
         } catch (Exception ex) {
             System.out.println(CAUGHT_ERROR_PROCESSING + measure.getType() + " compressDecompress : " + ex);
@@ -690,11 +724,13 @@ public class SerializationTestUtils {
         logDuration(start, measure.getType().name());
     }
 
-    public static MyTestObject UncompressAndDeserializeFromFile(Measure measure) throws IOException, ClassNotFoundException {
+    public static MyTestObject UncompressAndDeserializeFromFile(Measure measure)
+            throws IOException, ClassNotFoundException {
         long start = System.nanoTime();
         File fileRead = new File(TEST_PATH + "File_" + measure.fileDescription() + ".obj");
         long bytes = Files.size(fileRead.toPath());
-        System.out.println("Reading .obj file: " + bytes + " bytes (" + FileUtils.byteCountToDisplaySize(bytes) + ") from path: " + fileRead.getAbsolutePath());
+        System.out.println("Reading .obj file: " + bytes + " bytes (" + FileUtils.byteCountToDisplaySize(bytes)
+                + ") from path: " + fileRead.getAbsolutePath());
         FileInputStream fis = new FileInputStream(fileRead);
         BufferedInputStream bufferedFis = new BufferedInputStream(fis, measure.getBufferCompressCalculated());
         InputStream inStream = instantiateInputStreamByType(measure, bufferedFis);
