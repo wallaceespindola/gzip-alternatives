@@ -74,7 +74,7 @@
         <dependency>
             <groupId>com.aayushatharva.brotli4j</groupId>
             <artifactId>brotli4j</artifactId>
-            <version>1.12.0</version>
+            <version>1.20.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.nixxcode.jvmbrotli/jvmbrotli -->
         <dependency>
