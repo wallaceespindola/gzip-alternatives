@@ -11,6 +11,14 @@
     <name>GZIP Alternatives Benchmark</name>
 
     <!-- Set Java Version -->
+    <developers>
+        <developer>
+            <name>Wallace Espindola</name>
+            <email>wallace.espindola@gmail.com</email>
+            <url>https://github.com/wallaceespindola/</url>
+        </developer>
+    </developers>
+
     <properties>
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>

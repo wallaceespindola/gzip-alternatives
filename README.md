@@ -67,6 +67,7 @@ mvn exec:java -Dexec.mainClass="com.wtech.gziptests.Benchmark"
 - Wallace Espindola, Sr. Software Engineer / Java & Python Dev
 - E-mail: wallace.espindola@gmail.com
 - LinkedIn: https://www.linkedin.com/in/wallaceespindola/
+- GitHub: https://github.com/wallaceespindola/
 - Gravatar: https://gravatar.com/wallacese
 - Website: https://wtechitsolutions.com/
 
